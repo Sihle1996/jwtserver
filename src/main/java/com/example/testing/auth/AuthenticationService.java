@@ -8,8 +8,10 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import lombok.RequiredArgsConstructor;
 
 @Service
+@RequiredArgsConstructor
 public class AuthenticationService {
 
     private final UserRepository repository;
@@ -17,35 +19,27 @@ public class AuthenticationService {
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
 
-    public AuthenticationService(UserRepository repository, PasswordEncoder passwordEncoder, JwtService jwtService, AuthenticationManager authenticationManager) {
-        this.repository = repository;
-        this.passwordEncoder = passwordEncoder;
-        this.jwtService = jwtService;
-        this.authenticationManager = authenticationManager;
-    }
-
     public AuthenticationResponse register(RegisterRequest request) {
         repository.findByEmail(request.getEmail())
                 .ifPresent(user -> {
                     throw new IllegalArgumentException("User with email " + request.getEmail() + " already exists");
                 });
 
-        // Manually create a User object without using Lombok's builder
-        User user = new User();
-        user.setEmail(request.getEmail());
-        user.setPassword(passwordEncoder.encode(request.getPassword()));
-        user.setRole(Role.USER);
+        // Use Lombok's builder on the User class if available
+        User user = User.builder()
+                .email(request.getEmail())
+                .password(passwordEncoder.encode(request.getPassword()))
+                .role(Role.USER)
+                .build();
 
         repository.save(user);
 
-        // Generate token
         String jwtToken = jwtService.generateTokenWithId(user, user.getId());
 
-        // Manually create an AuthenticationResponse object without using Lombok's builder
-        AuthenticationResponse response = new AuthenticationResponse();
-        response.setToken(jwtToken);
-
-        return response;
+        // Use Lombok's builder on AuthenticationResponse if available
+        return AuthenticationResponse.builder()
+                .token(jwtToken)
+                .build();
     }
 
     public AuthenticationResponse authenticate(AuthenticationRequest request) {
@@ -61,11 +55,9 @@ public class AuthenticationService {
 
         String jwtToken = jwtService.generateTokenWithId(user, user.getId());
 
-        // Manually create an AuthenticationResponse object
-        AuthenticationResponse response = new AuthenticationResponse();
-        response.setToken(jwtToken);
-
-        return response;
+        return AuthenticationResponse.builder()
+                .token(jwtToken)
+                .build();
     }
 
     public User findById(Integer id) {

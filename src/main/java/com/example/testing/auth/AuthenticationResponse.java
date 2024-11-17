@@ -1,16 +1,20 @@
 package com.example.testing.auth;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class AuthenticationResponse {
 
     private String token;
 
-    // No-arg constructor
-    public AuthenticationResponse() {}
 
-    // All-arg constructor
-    public AuthenticationResponse(String token) {
-        this.token = token;
-    }
+
 
     // Builder pattern
     public static AuthenticationResponseBuilder builder() {
@@ -30,12 +34,5 @@ public class AuthenticationResponse {
         }
     }
 
-    // Getter and Setter
-    public String getToken() {
-        return token;
-    }
 
-    public void setToken(String token) {
-        this.token = token;
-    }
 }

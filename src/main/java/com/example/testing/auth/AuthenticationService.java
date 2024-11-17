@@ -4,11 +4,13 @@ import com.example.testing.config.JwtService;
 import com.example.testing.repository.UserRepository;
 import com.example.testing.user.Role;
 import com.example.testing.user.User;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import lombok.RequiredArgsConstructor;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -25,18 +27,16 @@ public class AuthenticationService {
                     throw new IllegalArgumentException("User with email " + request.getEmail() + " already exists");
                 });
 
-        // Use Lombok's builder on the User class if available
         User user = User.builder()
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .role(Role.USER)
                 .build();
 
-        repository.save(user);
+        user = repository.save(user);
 
         String jwtToken = jwtService.generateTokenWithId(user, user.getId());
 
-        // Use Lombok's builder on AuthenticationResponse if available
         return AuthenticationResponse.builder()
                 .token(jwtToken)
                 .build();
@@ -60,16 +60,16 @@ public class AuthenticationService {
                 .build();
     }
 
-    public User findById(Integer id) {
+    public User findById(Long id) {
         return repository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+                .orElseThrow(() -> new IllegalArgumentException("User not found with ID: " + id));
     }
 
-    public User updateUser(Integer id, User updatedUser) {
-        return repository.findById(id).map(existingUser -> {
-            existingUser.setPassword(passwordEncoder.encode(updatedUser.getPassword()));
-            existingUser.setEmail(updatedUser.getEmail());
-            return repository.save(existingUser);
-        }).orElseThrow(() -> new IllegalArgumentException("User not found"));
+    public List<User> getAllUsers() {
+        try {
+            return repository.findAll();
+        } catch (Exception e) {
+            throw new IllegalStateException("Failed to fetch users", e);
+        }
     }
 }

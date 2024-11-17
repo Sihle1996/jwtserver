@@ -46,10 +46,10 @@ public class JwtService {
         return buildToken(new HashMap<>(), userDetails, refreshExpiration);
     }
 
-    // New method to generate token with user ID
-    public String generateTokenWithId(UserDetails userDetails, Integer userId) {
+    // Updated to use Long for user ID
+    public String generateTokenWithId(UserDetails userDetails, Long userId) {
         Map<String, Object> claims = new HashMap<>();
-        claims.put("userId", userId);  // Adding userId to token claims
+        claims.put("userId", userId); // Adding userId to token claims
         return buildToken(claims, userDetails, jwtExpiration);
     }
 

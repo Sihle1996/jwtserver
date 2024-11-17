@@ -22,20 +22,21 @@ public class SecurityConfiguration {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(AbstractHttpConfigurer::disable) // Disable CSRF for stateless JWT
+                .csrf(AbstractHttpConfigurer::disable) // Disable CSRF for stateless API
+                .cors(cors -> {}) // Enable CORS globally
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
-                                "/api/v1/auth/**",        // Public endpoints for authentication
+                                "/api/v1/auth/**",        // Allow access to authentication endpoints
                                 "/api/v1/auth/register",
                                 "/api/v1/auth/authenticate"
                         ).permitAll()
-                        .anyRequest().authenticated() // All other endpoints require authentication
+                        .anyRequest().authenticated() // Protect other endpoints
                 )
                 .sessionManagement(sess ->
-                        sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS) // Stateless session
+                        sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS) // Use stateless sessions
                 )
-                .authenticationProvider(authenticationProvider) // Custom authentication provider
-                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class); // Add JWT filter
+                .authenticationProvider(authenticationProvider) // Set custom authentication provider
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class); // Add JWT authentication filter
 
         return http.build();
     }

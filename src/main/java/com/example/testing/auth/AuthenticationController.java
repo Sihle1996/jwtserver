@@ -2,7 +2,6 @@ package com.example.testing.auth;
 
 import com.example.testing.user.User;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,13 +20,13 @@ public class AuthenticationController {
         return ResponseEntity.ok(service.register(request));
     }
 
-    @PostMapping("/authenticate")
+    @PostMapping("/login")
     public ResponseEntity<AuthenticationResponse> authenticate(@RequestBody AuthenticationRequest request) {
         return ResponseEntity.ok(service.authenticate(request));
     }
 
     @GetMapping("/users")
-    public ResponseEntity<List<User>> getAllUsers() {
+     public ResponseEntity<List<User>> getAllUsers() {
         List<User> users = service.getAllUsers();
         return ResponseEntity.ok(users);
     }

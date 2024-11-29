@@ -28,7 +28,7 @@ public class SecurityConfiguration {
                         .requestMatchers(
                                 "/api/v1/auth/**",        // Allow access to authentication endpoints
                                 "/api/v1/auth/register",
-                                "/api/v1/auth/authenticate"
+                                "/api/v1/auth/login"
                         ).permitAll()
                         .anyRequest().authenticated() // Protect other endpoints
                 )

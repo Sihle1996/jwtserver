@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
+import com.example.testing.user.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -34,6 +35,10 @@ public class JwtService {
         return claimsResolver.apply(claims);
     }
 
+    public Long extractUserId(String token) {
+        return extractClaim(token, claims -> claims.get("userId", Long.class));
+    }
+
     public String generateToken(UserDetails userDetails) {
         return generateToken(new HashMap<>(), userDetails);
     }
@@ -46,10 +51,14 @@ public class JwtService {
         return buildToken(new HashMap<>(), userDetails, refreshExpiration);
     }
 
-    // Updated to use Long for user ID
     public String generateTokenWithId(UserDetails userDetails, Long userId) {
         Map<String, Object> claims = new HashMap<>();
-        claims.put("userId", userId); // Adding userId to token claims
+        claims.put("userId", userId);
+
+        if (userDetails instanceof User user) {
+            claims.put("role", "ROLE_" + user.getRole().name()); // Include role
+        }
+
         return buildToken(claims, userDetails, jwtExpiration);
     }
 

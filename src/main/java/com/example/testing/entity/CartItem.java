@@ -1,9 +1,8 @@
 package com.example.testing.entity;
 
-
+import com.example.testing.user.User;
 import jakarta.persistence.*;
-import lombok.Data;
-
+import lombok.*;
 @Data
 @Entity
 public class CartItem {
@@ -11,11 +10,22 @@ public class CartItem {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
-    private MenuItem menuItem; // Reference to the MenuItem
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
-    private int quantity; // Quantity of the item
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "menu_item_id", nullable = false)
+    private MenuItem menuItem;
 
-    @Column(nullable = false)
-    private Long userId; // Links the cart to a specific user by userId
+    private int quantity;
+
+    public void setUserId(Long userId) {
+        this.user = new User();
+        this.user.setId(userId); // Set the ID directly
+    }
+
+    public Long getUserId() {
+        return user != null ? user.getId() : null;
+    }
 }

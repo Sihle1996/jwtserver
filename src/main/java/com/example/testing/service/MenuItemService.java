@@ -44,4 +44,9 @@ public class MenuItemService {
         }
         menuItemRepository.deleteById(id);
     }
+
+    public List<MenuItem> createMenuItems(List<MenuItem> menuItems) {
+        return menuItemRepository.saveAll(menuItems);
+    }
+
 }

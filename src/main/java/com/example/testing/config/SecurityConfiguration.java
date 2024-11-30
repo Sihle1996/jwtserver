@@ -22,20 +22,35 @@ public class SecurityConfiguration {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(AbstractHttpConfigurer::disable) // Disable CSRF for stateless API
-                .cors(cors -> {}) // Enable CORS globally
+                .csrf(AbstractHttpConfigurer::disable) // Disable CSRF protection for a stateless API
+                .cors(cors -> {}) // Enable CORS for global access
                 .authorizeHttpRequests(auth -> auth
+                        // Public routes
                         .requestMatchers(
-                                "/api/v1/auth/**",        // Allow access to authentication endpoints
-                                "/api/v1/auth/register",
-                                "/api/v1/auth/login"
+                                "/api/v1/auth/register",  // Registration
+                                "/api/v1/auth/login",     // Login
+                                "/api/v1/auth/menu/**", // Menu endpoints accessible to all
+                                "/api/v1/auth/users/**"
+
                         ).permitAll()
-                        .anyRequest().authenticated() // Protect other endpoints
+
+                        // Admin-only routes
+                        .requestMatchers("/api/v1/auth/admin/**").hasRole("ADMIN")
+
+                        // Authenticated routes
+                        .requestMatchers("/api/v1/auth/cart/**").authenticated()   // Cart endpoints
+                        .requestMatchers("/api/v1/auth/cart/**").hasAnyRole("USER", "ADMIN")
+                        // Orders endpoints
+                        .requestMatchers("/api/v1/auth/cart/add").authenticated() // Ensure /add requires authentication
+
+
+                        // Catch-all for authenticated access
+                        .anyRequest().authenticated()
                 )
                 .sessionManagement(sess ->
-                        sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS) // Use stateless sessions
+                        sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS) // Set stateless sessions
                 )
-                .authenticationProvider(authenticationProvider) // Set custom authentication provider
+                .authenticationProvider(authenticationProvider) // Add custom authentication provider
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class); // Add JWT authentication filter
 
         return http.build();

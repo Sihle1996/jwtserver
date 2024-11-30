@@ -22,8 +22,6 @@ public class User implements UserDetails {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-
-
     private String email;
     private String password;
 
@@ -32,7 +30,9 @@ public class User implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority(role.name()));
+        // Ensure the role is not null to avoid NullPointerException
+        Role effectiveRole = role != null ? role : Role.USER;
+        return List.of(new SimpleGrantedAuthority(effectiveRole.name()));
     }
 
     @Override

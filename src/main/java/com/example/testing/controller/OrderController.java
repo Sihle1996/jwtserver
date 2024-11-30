@@ -1,8 +1,8 @@
 package com.example.testing.controller;
 
 import com.example.testing.entity.Order;
-import com.example.testing.principal.UserPrincipal;
 import com.example.testing.service.OrderService;
+import com.example.testing.user.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -16,14 +16,14 @@ public class OrderController {
     private final OrderService orderService;
 
     @GetMapping
-    public List<Order> getUserOrders(@AuthenticationPrincipal UserPrincipal userPrincipal) {
-        // Fetch user orders
-        return orderService.getOrdersByUserId(userPrincipal.getId());
+    public List<Order> getUserOrders(@AuthenticationPrincipal User user) {
+        // Fetch orders for the authenticated user
+        return orderService.getOrdersByUser(user);
     }
 
     @PostMapping
-    public Order placeOrder(@AuthenticationPrincipal UserPrincipal userPrincipal) {
-        // Place a new order for the user
-        return orderService.placeOrder(userPrincipal.getId());
+    public Order placeOrder(@AuthenticationPrincipal User user) {
+        // Place a new order for the authenticated user
+        return orderService.placeOrder(user);
     }
 }

@@ -9,13 +9,14 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("api/vi/auth/admin/menu")
+@RequestMapping("api/vi/auth/admin/")
 @RequiredArgsConstructor
 public class AdminMenuController {
     private final MenuService menuService;
 
     @PostMapping
     public MenuItem createMenuItem(@RequestBody MenuItem menuItem) {
+
         return menuService.createMenuItem(menuItem);
     }
 
@@ -24,7 +25,7 @@ public class AdminMenuController {
         return menuService.updateMenuItem(id, menuItem);
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("menu/{id}")
     public void deleteMenuItem(@PathVariable Long id) {
         menuService.deleteMenuItem(id);
     }
@@ -35,8 +36,8 @@ public class AdminMenuController {
     }
 
 //    @PostMapping("/bulk")
-//    public List<MenuItem> createMenuItems(@RequestBody List<MenuItem> menuItems) {
-//        return menuService.createMenuItems(menuItems);
+//    public List<MenuItem> createBulkMenuItems(@RequestBody List<MenuItem> menuItem) {
+//        return menuService.createBulkMenuItems(menuItem);
 //    }
 
 }

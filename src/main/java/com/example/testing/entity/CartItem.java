@@ -3,6 +3,7 @@ package com.example.testing.entity;
 import com.example.testing.user.User;
 import jakarta.persistence.*;
 import lombok.*;
+
 @Data
 @Entity
 public class CartItem {
@@ -19,13 +20,4 @@ public class CartItem {
     private MenuItem menuItem;
 
     private int quantity;
-
-    public void setUserId(Long userId) {
-        this.user = new User();
-        this.user.setId(userId); // Set the ID directly
-    }
-
-    public Long getUserId() {
-        return user != null ? user.getId() : null;
-    }
 }

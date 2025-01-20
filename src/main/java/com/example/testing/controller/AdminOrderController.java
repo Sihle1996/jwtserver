@@ -8,12 +8,12 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/admin/orders")
+@RequestMapping("/api/v1/auth/admin")
 @RequiredArgsConstructor
 public class AdminOrderController {
     private final OrderService orderService;
 
-    @GetMapping
+    @GetMapping("/orders")
     public List<Order> getAllOrders() {
         return orderService.getAllOrders();
     }

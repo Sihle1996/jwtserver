@@ -15,7 +15,7 @@ import java.util.List;
 public class OrderController {
     private final OrderService orderService;
 
-    @GetMapping
+    @GetMapping("/orders")
     public List<Order> getUserOrders(@AuthenticationPrincipal User user) {
         // Fetch orders for the authenticated user
         return orderService.getOrdersByUser(user);

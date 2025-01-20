@@ -9,7 +9,7 @@
 //import java.util.List;
 //
 //@Configuration
-//public class WebConfig {
+//public class WebConfiger {
 //
 //    @Bean
 //    public CorsFilter corsFilter() {

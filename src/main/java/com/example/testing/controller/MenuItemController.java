@@ -1,7 +1,7 @@
 package com.example.testing.controller;
 
 import com.example.testing.entity.MenuItem;
-import com.example.testing.service.MenuItemService;
+//import com.example.testing.service.MenuItemService;
 import com.example.testing.service.MenuService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -11,12 +11,12 @@ import java.util.List;
 
 
 @RestController
-@RequestMapping("/api/v1/auth/menu")
+@RequestMapping("/api/v1/auth/")
 @RequiredArgsConstructor
 public class MenuItemController {
     private final MenuService menuService;
 
-    @GetMapping
+    @GetMapping("/menu")
     public List<MenuItem> getAllMenuItems() {
         return menuService.getAllMenuItems();
     }
@@ -26,12 +26,12 @@ public class MenuItemController {
         return menuService.createMenuItem(menuItem);
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("menu/{id}")
     public MenuItem updateMenuItem(@PathVariable Long id, @RequestBody MenuItem menuItem) {
         return menuService.updateMenuItem(id, menuItem);
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("menu/{id}")
     public void deleteMenuItem(@PathVariable Long id) {
         menuService.deleteMenuItem(id);
     }

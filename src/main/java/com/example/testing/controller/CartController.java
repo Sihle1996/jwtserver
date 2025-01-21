@@ -3,64 +3,47 @@ package com.example.testing.controller;
 import com.example.testing.entity.CartItem;
 import com.example.testing.service.CartService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
-@RequestMapping("/api/v1/auth/")
-@RequiredArgsConstructor
+@RequestMapping("/api/cart")
 public class CartController {
+    @Autowired
+    private CartService cartService;
+    @PostMapping("/add")
+    public ResponseEntity<CartItem> addToCart(@RequestBody Map<String, Object> payload) {
+        Long userId = Long.valueOf(payload.get("userId").toString());
+        Long menuItemId = Long.valueOf(payload.get("menuItemId").toString());
+        Integer quantity = Integer.valueOf(payload.get("quantity").toString());
 
-    private final CartService cartService;
+        CartItem cartItem = cartService.addItemToCart(userId, menuItemId, quantity);
+        return ResponseEntity.ok(cartItem);
+    }
 
-    @GetMapping
-    public ResponseEntity<List<CartItem>> getCart(@RequestParam Long userId) {
-        System.out.println("Fetching cart for userId: " + userId);
-        List<CartItem> cartItems = cartService.getCart(userId);
+
+    @GetMapping("/{userId}")
+    public ResponseEntity<List<CartItem>> getUserCart(@PathVariable Long userId) {
+        List<CartItem> cartItems = cartService.getUserCartItems(userId);
         return ResponseEntity.ok(cartItems);
     }
 
-    @GetMapping("/public")
-    public ResponseEntity<String> publicEndpoint() {
-        return ResponseEntity.ok("Public endpoint accessible");
+    @PutMapping("/update/{cartItemId}")
+    public ResponseEntity<CartItem> updateCartItem(@PathVariable Long cartItemId,
+                                                   @RequestParam Integer quantity) {
+        CartItem updatedCartItem = cartService.updateCartItem(cartItemId, quantity);
+        return ResponseEntity.ok(updatedCartItem);
     }
 
-
-    @PostMapping("/add")
-    public ResponseEntity<CartItem> addToCart(@RequestBody CartItem cartItem, @RequestParam Long userId) {
-        System.out.println("Adding to cart for userId: " + userId + " with item: " + cartItem);
-        if (userId == null) {
-            throw new IllegalArgumentException("User ID is required");
-        }
-        CartItem savedCartItem = cartService.addToCart(cartItem, userId);
-        return ResponseEntity.ok(savedCartItem);
-    }
-
-
-    @DeleteMapping("/{cartItemId}")
-    public ResponseEntity<Void> removeFromCart(@PathVariable Long cartItemId) {
-        // Remove a specific item from the cart
-        cartService.removeFromCart(cartItemId);
-        return ResponseEntity.noContent().build();
-    }
-
-    @DeleteMapping("/clear")
-    public ResponseEntity<Void> clearCart() {
-        // Extract user ID from SecurityContext
-        var authentication = SecurityContextHolder.getContext().getAuthentication();
-        Long userId = (authentication != null && authentication.getPrincipal() instanceof Long)
-                ? (Long) authentication.getPrincipal()
-                : null;
-
-        if (userId == null) {
-            return ResponseEntity.status(403).build(); // Forbidden if userId is missing
-        }
-
-        // Clear the user's cart
-        cartService.clearCart(userId);
+    @DeleteMapping("/delete/{cartItemId}")
+    public ResponseEntity<Void> deleteCartItem(@PathVariable Long cartItemId) {
+        cartService.deleteCartItem(cartItemId);
         return ResponseEntity.noContent().build();
     }
 }
+

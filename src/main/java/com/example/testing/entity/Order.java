@@ -1,11 +1,15 @@
 package com.example.testing.entity;
 
+import com.example.testing.user.User;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 @Data
 @Entity
@@ -15,15 +19,29 @@ public class Order {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
-    private Long userId;
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference // Breaks cyclic reference with OrderItem
+    private List<OrderItem> orderItems = new ArrayList<>();
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<OrderItem> items; // Now uses OrderItem instead of CartItem
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    @JsonBackReference // Prevent serialization of user in order
+    private User user;
 
-    private double totalAmount;
-
+    private Double totalAmount;
+    private LocalDateTime orderDate;
     private String status;
 
-    private LocalDateTime createdAt = LocalDateTime.now();
+    public Order() {}
+
+    public Order(User user, List<OrderItem> orderItems, Double totalAmount, LocalDateTime orderDate, String status) {
+        this.user = user;
+        this.totalAmount = totalAmount;
+        this.orderDate = orderDate;
+        this.status = status;
+        this.orderItems = orderItems;
+        for (OrderItem item : orderItems) {
+            item.setOrder(this);
+        }
+    }
 }

@@ -7,31 +7,39 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-@Service
 @RequiredArgsConstructor
+@Service
 public class MenuService {
 
     private final MenuItemRepository menuItemRepository;
+
+    public MenuItem saveMenuItem(MenuItem menuItem) {
+        return menuItemRepository.save(menuItem);
+    }
+
+    public MenuItem updateMenuItem(Long id, MenuItem updatedMenuItem) {
+        MenuItem menuItem = menuItemRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Menu item not found"));
+        menuItem.setName(updatedMenuItem.getName());
+        menuItem.setDescription(updatedMenuItem.getDescription());
+        menuItem.setPrice(updatedMenuItem.getPrice());
+        menuItem.setIsAvailable(updatedMenuItem.getIsAvailable());
+        return menuItemRepository.save(menuItem);
+    }
+
+    public void deleteMenuItem(Long id) {
+        if (!menuItemRepository.existsById(id)) {
+            throw new RuntimeException("Menu item not found");
+        }
+        menuItemRepository.deleteById(id);
+    }
+
 
     public List<MenuItem> getAllMenuItems() {
         return menuItemRepository.findAll();
     }
 
-    public MenuItem createMenuItem(MenuItem menuItem) {
-        return menuItemRepository.save(menuItem);
-    }
-
-    public MenuItem updateMenuItem(Long id, MenuItem menuItem) {
-        MenuItem existingMenuItem = menuItemRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("MenuItem not found"));
-        existingMenuItem.setName(menuItem.getName());
-        existingMenuItem.setDescription(menuItem.getDescription());
-        existingMenuItem.setCategory(menuItem.getCategory());
-        existingMenuItem.setPrice(menuItem.getPrice());
-        return menuItemRepository.save(existingMenuItem);
-    }
-
-    public void deleteMenuItem(Long id) {
-        menuItemRepository.deleteById(id);
+    public List<MenuItem> saveAllMenuItems(List<MenuItem> menuItems) {
+        return menuItemRepository.saveAll(menuItems);
     }
 }

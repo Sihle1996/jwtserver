@@ -8,42 +8,71 @@ import com.example.testing.repository.UserRepository;
 import com.example.testing.user.User;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-@Service
+
 @RequiredArgsConstructor
+@Service
 public class CartService {
+    @Autowired
+    private CartItemRepository cartItemRepository;
 
-    private final CartItemRepository cartItemRepository;
-    private final MenuItemRepository menuItemRepository;
-    private final UserRepository userRepository;
+    @Autowired
+    private MenuItemRepository menuItemRepository;
 
-    public List<CartItem> getCart(Long userId) {
-        return cartItemRepository.findByUser_Id(userId);
-    }
+    @Autowired
+    private UserRepository userRepository;
 
-    public CartItem addToCart(CartItem cartItem, Long userId) {
+    public CartItem addItemToCart(Long userId, Long menuItemId, Integer quantity) {
+        if (quantity == null || quantity <= 0) {
+            throw new IllegalArgumentException("Quantity must be greater than 0");
+        }
+
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
-        MenuItem menuItem = menuItemRepository.findById(cartItem.getMenuItem().getId())
-                .orElseThrow(() -> new IllegalArgumentException("Menu item not found"));
+        MenuItem menuItem = menuItemRepository.findById(menuItemId)
+                .orElseThrow(() -> new RuntimeException("Menu item not found"));
 
-        cartItem.setUser(user);
-        cartItem.setMenuItem(menuItem);
+        CartItem cartItem = cartItemRepository.findByUserAndMenuItem(user, menuItem)
+                .orElseGet(() -> {
+                    CartItem newCartItem = new CartItem();
+                    newCartItem.setUser(user);
+                    newCartItem.setMenuItem(menuItem);
+                    return newCartItem;
+                });
+
+        int existingQuantity = (cartItem.getQuantity() != null) ? cartItem.getQuantity() : 0;
+        cartItem.setQuantity(existingQuantity + quantity);
+        cartItem.setTotalPrice(cartItem.getMenuItem().getPrice() * cartItem.getQuantity());
 
         return cartItemRepository.save(cartItem);
     }
 
-    @Transactional
-    public void removeFromCart(Long cartItemId) {
-        cartItemRepository.deleteById(cartItemId);
+
+
+    public List<CartItem> getUserCartItems(Long userId) {
+        return cartItemRepository.findByUserId(userId);
     }
 
-    @Transactional
-    public void clearCart(Long userId) {
-        cartItemRepository.deleteByUser_Id(userId);
+    public CartItem updateCartItem(Long cartItemId, Integer quantity) {
+        CartItem cartItem = cartItemRepository.findById(cartItemId)
+                .orElseThrow(() -> new RuntimeException("Cart item not found"));
+
+        cartItem.setQuantity(quantity);
+        cartItem.setTotalPrice(cartItem.getMenuItem().getPrice() * quantity);
+
+        return cartItemRepository.save(cartItem);
+    }
+
+    public void deleteCartItem(Long cartItemId) {
+        if (!cartItemRepository.existsById(cartItemId)) {
+            throw new RuntimeException("Cart item not found");
+        }
+        cartItemRepository.deleteById(cartItemId);
     }
 }
+

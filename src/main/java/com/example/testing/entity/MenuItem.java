@@ -1,8 +1,10 @@
 package com.example.testing.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
+import jdk.jfr.Category;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -12,6 +14,8 @@ import org.hibernate.validator.constraints.URL;
 
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -19,29 +23,25 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "menu_items") // Explicit table name
 public class MenuItem {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotBlank(message = "Name cannot be blank")
+    @NotBlank
     private String name;
 
-    @NotBlank(message = "Description cannot be blank")
     private String description;
 
-    @DecimalMin(value = "0.01", message = "Price must be greater than 0")
-    private double price;
+    @DecimalMin(value = "0.0", inclusive = false)
+    private Double price;
 
-    @URL(message = "Invalid URL format")
-    private String imageUrl;
+    private Boolean isAvailable;
 
-    @NotBlank(message = "Category cannot be blank")
+    @Column(name = "category") // Map to database column "category"
     private String category;
 
-    @CreationTimestamp
-    private LocalDateTime createdAt;
-
-    @UpdateTimestamp
-    private LocalDateTime updatedAt;
+    @OneToMany(mappedBy = "menuItem", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore // Prevent serialization of cart items in menu item
+    private List<CartItem> cartItems = new ArrayList<>();
 }
+

@@ -1,7 +1,6 @@
 package com.example.testing.controller;
 
 import com.example.testing.entity.MenuItem;
-
 import com.example.testing.service.MenuService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -9,15 +8,15 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("api/vi/auth/admin/")
+@RequestMapping("/api/v1/auth/admin/menu")
 @RequiredArgsConstructor
 public class AdminMenuController {
+
     private final MenuService menuService;
 
     @PostMapping
     public MenuItem createMenuItem(@RequestBody MenuItem menuItem) {
-
-        return menuService.createMenuItem(menuItem);
+        return menuService.saveMenuItem(menuItem);
     }
 
     @PutMapping("/{id}")
@@ -25,7 +24,7 @@ public class AdminMenuController {
         return menuService.updateMenuItem(id, menuItem);
     }
 
-    @DeleteMapping("menu/{id}")
+    @DeleteMapping("/{id}")
     public void deleteMenuItem(@PathVariable Long id) {
         menuService.deleteMenuItem(id);
     }
@@ -35,9 +34,8 @@ public class AdminMenuController {
         return menuService.getAllMenuItems();
     }
 
-//    @PostMapping("/bulk")
-//    public List<MenuItem> createBulkMenuItems(@RequestBody List<MenuItem> menuItem) {
-//        return menuService.createBulkMenuItems(menuItem);
-//    }
-
+    @PostMapping("/bulk")
+    public List<MenuItem> createBulkMenuItems(@RequestBody List<MenuItem> menuItems) {
+        return menuService.saveAllMenuItems(menuItems);
+    }
 }

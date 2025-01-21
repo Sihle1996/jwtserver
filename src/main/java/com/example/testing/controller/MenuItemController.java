@@ -8,13 +8,15 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/menu")
 public class MenuItemController {
 
     private final MenuService menuService;
-    @GetMapping("/menu")
+
+    @GetMapping
     public ResponseEntity<List<MenuItem>> getMenuItems() {
         List<MenuItem> menuItems = menuService.getAllMenuItems();
         return ResponseEntity.ok(menuItems);
@@ -39,3 +41,4 @@ public class MenuItemController {
         return ResponseEntity.noContent().build();
     }
 }
+

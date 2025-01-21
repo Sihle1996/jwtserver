@@ -1,36 +1,27 @@
 package com.example.testing.service;
 
+
 import com.example.testing.entity.CartItem;
+import com.example.testing.entity.CartItemDTO;
 import com.example.testing.entity.MenuItem;
 import com.example.testing.repository.CartItemRepository;
 import com.example.testing.repository.MenuItemRepository;
 import com.example.testing.repository.UserRepository;
 import com.example.testing.user.User;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Service
 public class CartService {
-    @Autowired
-    private CartItemRepository cartItemRepository;
+    private final CartItemRepository cartItemRepository;
+    private final MenuItemRepository menuItemRepository;
+    private final UserRepository userRepository;
 
-    @Autowired
-    private MenuItemRepository menuItemRepository;
-
-    @Autowired
-    private UserRepository userRepository;
-
-    public CartItem addItemToCart(Long userId, Long menuItemId, Integer quantity) {
-        if (quantity == null || quantity <= 0) {
-            throw new IllegalArgumentException("Quantity must be greater than 0");
-        }
-
+    public CartItemDTO addItemToCart(Long userId, Long menuItemId, Integer quantity) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
@@ -45,27 +36,29 @@ public class CartService {
                     return newCartItem;
                 });
 
-        int existingQuantity = (cartItem.getQuantity() != null) ? cartItem.getQuantity() : 0;
-        cartItem.setQuantity(existingQuantity + quantity);
-        cartItem.setTotalPrice(cartItem.getMenuItem().getPrice() * cartItem.getQuantity());
+        cartItem.setQuantity((cartItem.getQuantity() == null ? 0 : cartItem.getQuantity()) + quantity);
+        cartItem.setTotalPrice(menuItem.getPrice() * cartItem.getQuantity());
 
-        return cartItemRepository.save(cartItem);
+        cartItem = cartItemRepository.save(cartItem);
+
+        return convertToDTO(cartItem);
     }
 
-
-
-    public List<CartItem> getUserCartItems(Long userId) {
-        return cartItemRepository.findByUserId(userId);
+    public List<CartItemDTO> getUserCartItems(Long userId) {
+        List<CartItem> cartItems = cartItemRepository.findByUserId(userId);
+        return cartItems.stream().map(this::convertToDTO).collect(Collectors.toList());
     }
 
-    public CartItem updateCartItem(Long cartItemId, Integer quantity) {
+    public CartItemDTO updateCartItem(Long cartItemId, Integer quantity) {
         CartItem cartItem = cartItemRepository.findById(cartItemId)
                 .orElseThrow(() -> new RuntimeException("Cart item not found"));
 
         cartItem.setQuantity(quantity);
         cartItem.setTotalPrice(cartItem.getMenuItem().getPrice() * quantity);
 
-        return cartItemRepository.save(cartItem);
+        cartItem = cartItemRepository.save(cartItem);
+
+        return convertToDTO(cartItem);
     }
 
     public void deleteCartItem(Long cartItemId) {
@@ -74,5 +67,15 @@ public class CartService {
         }
         cartItemRepository.deleteById(cartItemId);
     }
-}
 
+    private CartItemDTO convertToDTO(CartItem cartItem) {
+        CartItemDTO dto = new CartItemDTO();
+        dto.setId(cartItem.getId());
+        dto.setMenuItemId(cartItem.getMenuItem().getId());
+        dto.setMenuItemName(cartItem.getMenuItem().getName());
+        dto.setMenuItemPrice(cartItem.getMenuItem().getPrice());
+        dto.setQuantity(cartItem.getQuantity());
+        dto.setTotalPrice(cartItem.getTotalPrice());
+        return dto;
+    }
+}

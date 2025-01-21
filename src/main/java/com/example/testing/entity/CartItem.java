@@ -1,14 +1,13 @@
 package com.example.testing.entity;
 
 import com.example.testing.user.User;
-import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
 
-
-
 @Data
 @Entity
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class CartItem {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -16,7 +15,6 @@ public class CartItem {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
-    @JsonBackReference // Prevent serialization of user in cart item
     private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -28,5 +26,3 @@ public class CartItem {
 
     private Double totalPrice;
 }
-
-
